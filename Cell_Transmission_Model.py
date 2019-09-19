@@ -67,10 +67,8 @@ class Cell(object):
             pk = 0.5 # probability from upstream normal cell
             pck = 1 - pk # probability from upstream merge cell
             for elem in self.cfrom:
-#                rek = np.min([self.qmax / self.vf, self.w / self.vf * (self.kjam - self.oldk)])
                 rek = np.min([self.qmax, self.w * (self.kjam - self.oldk)]) * self.time_hour / self.length
                 if elem.linkid == self.linkid:
-#                    sbk = np.min([elem.qmax / elem.vf, elem.oldk])
                     sbk = np.min([elem.qmax * elem.time_hour / elem.length, elem.oldk])
                     prov = elem
                     
@@ -180,9 +178,6 @@ def simulation_Main(endtime):
     on_ramp.addConnection(cells[1])
     off_ramp = Cell('D1', '', '', dis_rate=2000)
     cells[2].addConnection(off_ramp)
-    
-#    cells[1].kjam = cells[1].kjam / 2
-#    cells[2].kjam = cells[2].kjam / 2
     
     dfindex = []
     for elem in cells:
