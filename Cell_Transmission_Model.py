@@ -27,7 +27,7 @@ class Cell(object):
         self.cellid = cellid # local address
         self.linkid = linkid # link layer address
         self.zoneid = zoneid # zone layer address
-        self.vf = vf # Time interval = length / vf
+        self.vf = vf
         self.w = w
         self.cfrom = []
         self.cto = []
