@@ -51,7 +51,7 @@ class Cell(object):
         if len(sink.cfrom) == 2 or len(self.cto) == 2:
             raise Exception("Cannot add more connection to cell %s and cell %s") % (self.cellid, sink.cellid)
             
-        if len(sink.cto) == 2 or len(self.cfrom) == 2:
+        if (len(self.cto) and len(sink.cfrom)) and len(sink.cto) == 2 or len(self.cfrom) == 2:
             raise Exception("Invaild cell connection! A cell cannot connect to merge and diverge cell simultaneously")
             
         self.cto.append(sink) # An instance of cell class is stored, in order to use cto and cfrom as pointer.
