@@ -196,12 +196,10 @@ def simulation_Main(endtime):
     off_ramp = Cell('D1', '', '', dis_rate=2000)
     cells[2].addConnection(off_ramp)
     
-<<<<<<< HEAD
 #    cells[1].kjam = cells[1].kjam / 2
 #    cells[2].kjam = cells[2].kjam / 2
     cells.extend([on_ramp, off_ramp])
-=======
->>>>>>> 5f282b9a9a7a7edecd135bbd517b7d9f0bc7ec4c
+
     dfindex = []
     for elem in cells:
         dfindex.append(elem.getCompleteAddress())
