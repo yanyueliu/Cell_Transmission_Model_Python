@@ -21,6 +21,12 @@ import numpy as np
 # Sep 19, 2019
 # Two new cell class attributes about time interval are introduced. Now time interval is not related with cell length and free flow speed.
 # Bugs about wrong outflow of diverge cell and inflow rate of merge cell are fixed.
+
+# Sep 30, 2019
+# When merge cell has a from cell, sending capacity of the from cell is considered, instead of arrival rate. Calculation of density of diverge cell is changed as well.
+
+# Oct 5, 2019
+# A bug about diverge cell is fixed.
 class Cell(object):
     def __init__(self, cellid, linkid, zoneid, time_interval=6, k=0, qmax=2160, kjam=220, vf=60, w=12, length=0.1, updated=False, arr_rate=0, dis_rate=0):
         self.kjam = kjam
@@ -62,7 +68,8 @@ class Cell(object):
         return "%s.%s.%s" % (self.zoneid, self.linkid, self.cellid)
     
     def updateDensity(self): # This method can only be used by normal cell instance.
-        self.oldk = self.k
+        if not self.updated:
+            self.oldk = self.k
         if len(self.cfrom) == 2: # Merge at here, we need to update density among this cell and two other upstream cells.
             pk = 0.5 # probability from upstream normal cell
             pck = 1 - pk # probability from upstream merge cell
@@ -87,8 +94,13 @@ class Cell(object):
                 prov.k = prov.oldk + \
                             np.min([prov.qmax, prov.arr_rate, prov.w * (prov.kjam - prov.oldk)]) * prov.time_hour / prov.length \
                             - np.min([np.median([pk * rek, sbk, rek - sck]), prov.oldk])
-                            
-            merge.k = merge.oldk + \
+            
+            if len(merge.cfrom):                
+                merge.k = merge.oldk + \
+                            np.min([merge.qmax, merge.vf * merge.cfrom[0].oldk, merge.w * (merge.kjam - merge.oldk)]) * merge.time_hour / merge.length \
+                            - np.min([np.median([pck * rek, sck, rek - sbk]), merge.oldk])
+            else:
+                merge.k = merge.oldk + \
                             np.min([merge.qmax, merge.arr_rate, merge.w * (merge.kjam - merge.oldk)]) * merge.time_hour / merge.length \
                             - np.min([np.median([pck * rek, sck, rek - sbk]), merge.oldk])
                             
@@ -96,7 +108,7 @@ class Cell(object):
                     np.min([self.qmax * self.time_hour / self.length, sbk+sck, self.w * (self.kjam - self.oldk) * self.time_hour / self.length]) \
                     - np.min([self.qmax, self.oldk * self.vf, self.w * (self.kjam - self.cto[0].oldk)]) * self.time_hour / self.length
                     
-            prov.updated, self.updated = True, True
+            prov.updated, self.updated, merge.updated = True, True, True
             
         elif len(self.cto) == 2: # Diverge at here
             ptnc = 0.5 # Propotion towards to next normal cell
@@ -122,16 +134,21 @@ class Cell(object):
                 next_c.k = next_c.oldk + \
                     ptnc * np.min([sbk, rek/ptdc, rck/ptnc]) \
                     - np.min([next_c.qmax, next_c.vf * next_c.oldk, next_c.dis_rate]) * next_c.time_hour / next_c.length
-                    
-            diverge.k = diverge.oldk + \
+            
+            if len(diverge.cto):
+                diverge.k = diverge.oldk + \
                     ptdc * np.min([sbk, rek/ptdc, rck/ptnc])\
-                    - np.min([diverge.qmax, diverge.oldk * diverge.vf, diverge.dis_rate])  * diverge.time_hour / diverge.length
-                    
+                    - np.min([diverge.qmax, diverge.oldk * diverge.vf, diverge.w * (diverge.kjam - diverge.oldk)]) * diverge.time_hour / diverge.length
+            else:
+                diverge.k = diverge.oldk + \
+                    ptdc * np.min([sbk, rek/ptdc, rck/ptnc])\
+                    - np.min([diverge.qmax, diverge.oldk * diverge.vf, diverge.dis_rate]) * diverge.time_hour / diverge.length
+                
             self.k = self.oldk + \
                     np.min([self.qmax, self.cfrom[0].oldk * self.vf, self.w * (self.kjam - self.oldk)]) * self.time_hour / self.length \
                     - np.min([sbk, rek/ptdc, rck/ptnc])
                     
-            next_c.updated, self.updated = True, True
+            next_c.updated, self.updated, diverge.updated = True, True, True
                     
         else: # Normal cell
             if self.updated:
@@ -183,20 +200,21 @@ def simulation_Main(endtime):
     
 #    cells[1].kjam = cells[1].kjam / 2
 #    cells[2].kjam = cells[2].kjam / 2
-    
+    cells.extend([on_ramp, off_ramp])
     dfindex = []
     for elem in cells:
         dfindex.append(elem.getCompleteAddress())
         
-    dfindex.extend(["on ramp", "off ramp"])
+#    dfindex.extend(["on ramp", "off ramp"])
     df = pd.DataFrame(index=dfindex)
     for t in range(endtime):
         density = []
         for elem in cells:
             elem.updateDensity()
+        for elem in cells:
             density.append(elem.k)
             elem.updated = False
-        density.extend([on_ramp.k, off_ramp.k])
+#        density.extend([on_ramp.k, off_ramp.k])
         df["t%i"%t] = density
         
     return df
