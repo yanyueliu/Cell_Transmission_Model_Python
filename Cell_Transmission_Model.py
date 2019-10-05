@@ -33,7 +33,7 @@ class Cell(object):
         self.cellid = cellid # local address
         self.linkid = linkid # link layer address
         self.zoneid = zoneid # zone layer address
-        self.vf = vf # Time interval = length / vf
+        self.vf = vf
         self.w = w
         self.cfrom = []
         self.cto = []
@@ -74,10 +74,8 @@ class Cell(object):
             pk = 0.5 # probability from upstream normal cell
             pck = 1 - pk # probability from upstream merge cell
             for elem in self.cfrom:
-#                rek = np.min([self.qmax / self.vf, self.w / self.vf * (self.kjam - self.oldk)])
                 rek = np.min([self.qmax, self.w * (self.kjam - self.oldk)]) * self.time_hour / self.length
                 if elem.linkid == self.linkid:
-#                    sbk = np.min([elem.qmax / elem.vf, elem.oldk])
                     sbk = np.min([elem.qmax * elem.time_hour / elem.length, elem.oldk])
                     prov = elem
                     
@@ -198,9 +196,12 @@ def simulation_Main(endtime):
     off_ramp = Cell('D1', '', '', dis_rate=2000)
     cells[2].addConnection(off_ramp)
     
+<<<<<<< HEAD
 #    cells[1].kjam = cells[1].kjam / 2
 #    cells[2].kjam = cells[2].kjam / 2
     cells.extend([on_ramp, off_ramp])
+=======
+>>>>>>> 5f282b9a9a7a7edecd135bbd517b7d9f0bc7ec4c
     dfindex = []
     for elem in cells:
         dfindex.append(elem.getCompleteAddress())
