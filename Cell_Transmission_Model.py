@@ -102,9 +102,14 @@ class Cell(object):
                             np.min([merge.qmax, merge.arr_rate, merge.w * (merge.kjam - merge.oldk)]) * merge.time_hour / merge.length \
                             - np.min([np.median([pck * rek, sck, rek - sbk]), merge.oldk])
                             
-            self.k = self.oldk + \
+            if len(self.cto):                
+                self.k = self.oldk + \
                     np.min([self.qmax * self.time_hour / self.length, sbk+sck, self.w * (self.kjam - self.oldk) * self.time_hour / self.length]) \
                     - np.min([self.qmax, self.oldk * self.vf, self.w * (self.kjam - self.cto[0].oldk)]) * self.time_hour / self.length
+            else:
+                self.k = self.oldk + \
+                    np.min([self.qmax * self.time_hour / self.length, sbk+sck, self.w * (self.kjam - self.oldk) * self.time_hour / self.length]) \
+                    - np.min([self.qmax, self.oldk * self.vf, self.dis_rate]) * self.time_hour / self.length
                     
             prov.updated, self.updated, merge.updated = True, True, True
             
@@ -142,8 +147,13 @@ class Cell(object):
                     ptdc * np.min([sbk, rek/ptdc, rck/ptnc])\
                     - np.min([diverge.qmax, diverge.oldk * diverge.vf, diverge.dis_rate]) * diverge.time_hour / diverge.length
                 
-            self.k = self.oldk + \
+            if len(self.cfrom):
+                self.k = self.oldk + \
                     np.min([self.qmax, self.cfrom[0].oldk * self.vf, self.w * (self.kjam - self.oldk)]) * self.time_hour / self.length \
+                    - np.min([sbk, rek/ptdc, rck/ptnc])
+            else:
+                self.k = self.oldk + \
+                    np.min([self.qmax, self.arr_rate, self.w * (self.kjam - self.oldk)]) * self.time_hour / self.length \
                     - np.min([sbk, rek/ptdc, rck/ptnc])
                     
             next_c.updated, self.updated, diverge.updated = True, True, True
