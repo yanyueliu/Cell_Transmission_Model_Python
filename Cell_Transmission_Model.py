@@ -76,11 +76,11 @@ class Cell(object):
             for elem in self.cfrom:
                 rek = np.min([self.qmax, self.w * (self.kjam - self.oldk)]) * self.time_hour / self.length
                 if elem.linkid == self.linkid:
-                    sbk = np.min([elem.qmax * elem.time_hour / elem.length, elem.oldk])
+                    sbk = np.min([elem.qmax, elem.vf * elem.oldk]) * elem.time_hour / elem.length
                     prov = elem
                     
                 else:
-                    sck = np.min([elem.qmax * elem.time_hour / elem.length, elem.oldk])
+                    sck = np.min([elem.qmax, elem.vf * elem.oldk]) * elem.time_hour / elem.length
                     elem.oldk = elem.k
                     merge = elem
             
