@@ -58,7 +58,7 @@ class Cell(object):
         sink.cfrom.append(self)
         
     def deleteConnection(self, sink):
-        if sink.cellid not in self.cto:
+        if sink not in self.cto:
             raise Exception("Cell %s is not connected with cell %s") % (self.cellid, sink.cellid)
             
         self.cto.remove(sink)
