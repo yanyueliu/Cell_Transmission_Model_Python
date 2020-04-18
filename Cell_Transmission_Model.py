@@ -196,23 +196,6 @@ class Cell(object):
             
             self.k = self.oldk + np.max([0, self.inflow]) - np.max([0, self.outflow])            
             self.updated = True
-
-class interSection(object):
-    idcase = {}
-    count = 0
-    def __init__(self, cell):
-        if cell.__class__ != Cell:
-            raise Exception("Input parameter must be a Cell class object that has more than one upstream or downstream cell.")
-        self.id = interSection.count
-        interSection.count += 1
-        interSection.idcase[cell] = self
-        
-    def setProportion(self, p1, p2):
-        self.p1 = p1 # probability from upstream normal cell or toward downstream normal cell 
-        self.p2 = p2 # probability from upstream merge cell or toward downstream diverge cell 
-    
-    def getProportion(self):
-        return (self.p1, self.p2)
     
 class node(object):
     idcase = {}
