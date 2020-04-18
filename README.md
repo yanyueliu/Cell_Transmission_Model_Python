@@ -14,8 +14,8 @@ Some bugs are fixed.
 Now Cell class has an idcase that a dictionary has values of all Cell class instance and keys of the complete address of the instance. One can use getCell() method to get a specific Cell class instance, or directly use Cell.idcase[key]. 
 For example: 
 input:
->> Cell.getCell("A0.B0.C0") or Cell.idcase["A0.B0.C0"]
+Cell.getCell("A0.B0.C0") or Cell.idcase["A0.B0.C0"]
 output:
->> <__main__.Cell at 0x29fc953b518>
+<__main__.Cell at 0x29fc953b518>
 
 Also, getFisrtCell and getLastCell method can return the first and the last cell of a link. Input argument is linkid.
