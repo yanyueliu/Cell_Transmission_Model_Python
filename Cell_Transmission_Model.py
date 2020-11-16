@@ -47,11 +47,6 @@ class Cell(object):
         self.cto.append(sink) # An instance of cell class is stored, in order to use cto and cfrom as pointer.
         sink.cfrom.append(self)
         
-        if len(self.cto) >= 2:
-            interSection(self)
-        elif len(sink.cfrom) >= 2:
-            interSection(sink)
-        
     def deleteConnection(self, sink):
         if sink not in self.cto:
             raise Exception("Cell %s is not connected with cell %s" % (self.getCompleteAddress(), sink.getCompleteAddress()))
