@@ -1,24 +1,28 @@
-# Cell_Transmission_Model_Python
-A cell transmission model based on python.
+# Cell Transmission Model Ver. GMNS
+## Overview
+This program is based on former CTM program in python: (https://github.com/yanyueliu/Cell_Transmission_Model_Python). This version can read GMNS format file and generate CTM network automatically. A example of Arizona network is contained in the program.
 
-The vast majority of formula is same with the origin CTM model which is proposed by Daganzo in 1994. A difference with Daganzo's model is that density of a cell is calculated instead of number of vehicles.
+## I/O
+### Input
+#### link.csv
+One can obtain GMNS format network as input of the program. Please refer: https://github.com/jiawlu/OSM2GMNS
 
-This code is easy to use because it is simple and only requires pandas and numpy package, which are very common python packages.
+#### demand.csv
+One may specify traffic demand of a corridor. Demand.csv must contain time, corridor_id and demand column. Time column defines frequency to change traffic demand, and the frequency is equal with time period defined in supply.csv. If the last row of demand is read but 
 
-Since simulating traffic profromance of arterial road is motivation to code CTM with python, simulation of intersection of urban traffic network may not available yet. 
+#### supply.csv
+This file contains initial density of corridor and capacity of a link can be changed as time sensetive variable in this file. The volume colunm means outflow rate of a link, the last cell of the link will use it as value of dis_rate attribute. 
 
-Update at Apr 18
+Time_period column defines time period that the program update capacity of cells and total simulation time. The program will parse time_period column, details are explained in example.
 
-Some bugs are fixed.
+### Output
+Density profile of all corridors in link.csv
+Flow rate that leave cells of all corridors in link.csv
 
-Now Cell class has an idcase that a dictionary has values of all Cell class instance and keys of the complete address of the instance. One can use getCell() method to get a specific Cell class instance, or directly use Cell.idcase[key]. 
+## Usage
+This program contains an example with road network in Arizona, US. Users can refer format of link.csv, demand.csv and supply.csv to prepare your file.
+Users just need to overwrite link.csv, demand.csv and supply.csv with files defined by users and then run the program.
 
-For example: 
-
-input:
-Cell.getCell("A0.B0.C0") or Cell.idcase["A0.B0.C0"]
-
-output:
-<__main__.Cell at 0x29fc953b518>
-
-Also, getFisrtCell and getLastCell method can return the first and the last cell of a link. Input argument is linkid.
+## Users guide
+More information, please check the word documention user guide. 
+如果您需要阅读用户指南，请参考文件夹中的word文档。
