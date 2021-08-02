@@ -1,6 +1,6 @@
 # Cell Transmission Model Ver. GMNS
 ## Overview
-This program is based on former CTM program in python: (https://github.com/yanyueliu/Cell_Transmission_Model_Python). This version can read GMNS format file and generate CTM network automatically. A example of Arizona network is contained in the program.
+This program is based on former CTM program in python: (https://github.com/yanyueliu/Cell_Transmission_Model_Python/tree/Old-version). This version can read GMNS format file and generate CTM network automatically. A example of Arizona network is contained in the program.
 
 ## I/O
 ### Input
