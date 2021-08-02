@@ -24,5 +24,5 @@ This program contains an example with road network in Arizona, US. Users can ref
 Users just need to overwrite link.csv, demand.csv and supply.csv with files defined by users and then run the program.
 
 ## Users guide
-More information, please check user guide in ./Doc. \n
+More information, please check user guide in ./Doc. <br></br>
 如果您需要阅读用户指南，请参考Doc文件夹中的word文档。
