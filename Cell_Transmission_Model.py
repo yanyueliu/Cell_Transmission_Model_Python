@@ -350,9 +350,9 @@ def simulation_Main():
                 density.append(elem.k)
                 flow.append(elem.outflow)
                 elem.updated = False
-    #        density.extend([on_ramp.k, off_ramp.k])
-            df["t%i"%t] = density
-            flowdf["t%i"%t] = flow
+    
+            df = pd.concat([df, pd.DataFrame(data=density, index=dfindex, columns=["t%i"%t])], axis=1)
+            flowdf = pd.concat([flowdf, pd.DataFrame(data=flow, index=dfindex, columns=["t%i"%t])], axis=1)
         
         df.to_csv("Density_profile_%s.csv" % corridor)
         flowdf.to_csv("Flow_profile_%s.csv" % corridor)
