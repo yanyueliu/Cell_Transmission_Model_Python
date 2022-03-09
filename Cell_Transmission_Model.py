@@ -254,9 +254,9 @@ def timeDependentDemand(order, t, miu, gamma, t0, t2=0, t3=0):
         raise Exception("Invaild input parameter! Order of time dependtent demand formula must be 1, 2 or 3")
         
 def readNetwork(cell_length=100):
-    linkdf = pd.read_csv('link.csv')
+    linkdf = pd.read_csv('link.csv', dtype={'link_id': object, 'to_node_id': object, 'from_node_id': object})
     demand = pd.read_csv('demand.csv', index_col=0)
-    supply = pd.read_csv('supply.csv')
+    supply = pd.read_csv('supply.csv', dtype={'to_node_id': object, 'from_node_id': object})
     
     corridors = linkdf['corridor_id'].drop_duplicates()
     link = {}
@@ -298,7 +298,8 @@ def simulation_Main():
     network = readNetwork()
     demand = network[1]
     supply = network[2]
-    linkdf = pd.read_csv('link.csv')
+    linkdf = pd.read_csv('link.csv', dtype={'link_id': object, 'to_node_id': object, 'from_node_id': object})
+
     time_tick = 6
     time_to_update_demand = 50
     
