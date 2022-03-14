@@ -26,3 +26,6 @@ Users just need to overwrite link.csv, demand.csv and supply.csv with files defi
 ## Users guide
 More information, please check user guide in ./Doc. <br></br>
 如果您需要阅读用户指南，请参考Doc文件夹中的word文档。
+
+## Notes
+Problem of link id is read as numpy.float64 format is solved.
