@@ -34,3 +34,6 @@ Problem of link id is read as numpy.float64 format is solved.
 A new column ramp_flag is added in demand.csv. Users can define dynamic traffic demand of ramp with ramp_flag = 1.<br></br>
 Two examples are uploaded. The first example uses dynamic traffic demand with cubic polynominal form. The second example uses dynamic cell capacity with quadratic polynominal form. <br></br>
 For more details, please refer: <b>Cheng, Q., Liu, Z., Guo, J., Wu, X., Pendyala, R., Belezamo, B., & Zhou, X. S. (2022). Estimating key traffic state parameters through parsimonious spatial queue models. Transportation Research Part C: Emerging Technologies, 137, 103596.</b>
+### March 24 2022
+A new example is uploaded. The example is a merge ramp example. <br></br>
+A bug about merge ramp and diverge ramp is fixed.
