@@ -319,8 +319,16 @@ def simulation_Main():
         supply_period = (int(re.split(r'_', start_string)[1]) % 100 - int(re.split(r'_', start_string)[0]) % 100) * 60 / time_tick
         
         dfindex = []
+        main_roads = []
+        ramps = []
+        
         for elem in cells:
             dfindex.append(elem.getCompleteAddress())
+            
+            if elem.ramp_flag == 0:
+                main_roads.append(elem)
+            else:
+                ramps.append(elem)
             
         df = pd.DataFrame(index=dfindex)
         flowdf = pd.DataFrame(index=dfindex)
@@ -349,13 +357,20 @@ def simulation_Main():
                         Cell.getFirstCell(ramp_df.iloc[0]['link_id']).arr_rate = ramp_demand_df.iloc[-1]['demand']
                     else:
                         Cell.getFirstCell(ramp_df.iloc[0]['link_id']).arr_rate = ramp_demand_df.iloc[int(t / time_to_update_demand)]['demand']
+                        
+            for elem in ramps:
+                elem.updateDensity()
             
-            for elem in cells:
+            for elem in main_roads:
                 if not t % supply_period:
-                    if elem.ramp_flag == 1:
-                        continue
-                    link_order = linkdf.where(linkdf['link_id'] == elem.linkid).dropna(subset=['corridor_id']).iloc[0]['corridor_link_order']
-                    Cell.getLastCell(elem.linkid).qmax = corr_supply.where(corr_supply['corridor_link_order'] == link_order).dropna(subset=['corridor_id']).iloc[int(t / supply_period)]['volume']
+                    if elem.ramp_flag == 0:
+                        link_order = linkdf.where(linkdf['link_id'] == elem.linkid).dropna(subset=['corridor_id']).iloc[0]['corridor_link_order']
+                        Cell.getLastCell(elem.linkid).qmax = corr_supply.where(corr_supply['corridor_link_order'] == link_order).dropna(subset=['corridor_id']).iloc[int(t / supply_period)]['volume']
+                    # if elem.ramp_flag == 1:
+                    #     continue
+                    # link_order = linkdf.where(linkdf['link_id'] == elem.linkid).dropna(subset=['corridor_id']).iloc[0]['corridor_link_order']
+                    # Cell.getLastCell(elem.linkid).qmax = corr_supply.where(corr_supply['corridor_link_order'] == link_order).dropna(subset=['corridor_id']).iloc[int(t / supply_period)]['volume']
+                
                 elem.updateDensity()
             for elem in cells:
                 density.append(elem.k)
