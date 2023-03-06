@@ -324,7 +324,7 @@ def simulation_Main():
         start_min = int(re.split(r'_', start_string)[0]) % 100
         end_hour = int(re.split(r'_', end_string)[0]) / 100
         end_min = int(re.split(r'_', end_string)[0]) % 100
-        total_time = end_hour + end_min / 60 - start_hour - start_min / 60 # hour
+        total_time = int(end_hour) + end_min / 60 - int(start_hour) - start_min / 60 # hour
         total_tick = int(total_time * 3600 / time_tick)
         supply_period = (int(re.split(r'_', start_string)[1]) % 100 - int(re.split(r'_', start_string)[0]) % 100) * 60 / time_tick
         
