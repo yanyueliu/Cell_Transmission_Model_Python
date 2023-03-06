@@ -35,5 +35,9 @@ A new column ramp_flag is added in demand.csv. Users can define dynamic traffic 
 Two examples are uploaded. The first example uses dynamic traffic demand with cubic polynominal form. The second example uses dynamic cell capacity with quadratic polynominal form. <br></br>
 For more details, please refer: <b>Cheng, Q., Liu, Z., Guo, J., Wu, X., Pendyala, R., Belezamo, B., & Zhou, X. S. (2022). Estimating key traffic state parameters through parsimonious spatial queue models. Transportation Research Part C: Emerging Technologies, 137, 103596.</b>
 ### March 24 2022
-A new example is uploaded. The example is a merge ramp example. <br></br>
+A new example is uploaded (The example 3). The example is a merge ramp example. <br></br>
 A bug about merge ramp and diverge ramp is fixed.
+### March 6 2023
+A new example is uploaded (The example 4). The example shows how to set dynamic freeflow speed and jam density in the supply.csv.<br></br>
+The users can use the speed column in the supply.csv to set freeflow speed of a link.<br></br>
+A new column named kjam is added into the supply.csv, which can be used to set jam density of a link.
