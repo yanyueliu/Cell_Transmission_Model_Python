@@ -232,10 +232,10 @@ def getCrossProduct(va, vb):
 def getEuclideanDis(x1, x2, y1, y2):
     return np.sqrt(np.power(x2 - x1, 2) + np.power(y2 - y1, 2))
     
-def quicklyCreateCells(number, linkid):
+def quicklyCreateCells(number, linkid, vf=60, kjam=220):
     cells = []
     for i in range(number):
-        cells.append(Cell('C'+str(i), linkid, 'A0', arr_rate=0, dis_rate=1800))
+        cells.append(Cell('C'+str(i), linkid, 'A0', vf=vf, kjam=kjam, arr_rate=0, dis_rate=1800))
                 
     for index in range(len(cells)):
         if index < len(cells) - 1:
@@ -269,7 +269,15 @@ def readNetwork(cell_length=100):
             ramp = []
             if temp_linkdf.iloc[i]['ramp_flag']:
                 for k in range(int(temp_linkdf.iloc[i]['length'] / cell_length) + 1):
-                    cell = Cell('C'+str(k), temp_linkdf.iloc[i]['link_id'], 'A0', arr_rate=500,ramp_flag=1)
+                    if temp_linkdf.iloc[i]['from_node_id'] != '0':
+                        ramp_vf = supply.where(supply['to_node_id'] == temp_linkdf.iloc[i]['to_node_id']).dropna(subset=['to_node_id']).iloc[0]['speed']
+                        ramp_kjam = supply.where(supply['to_node_id'] == temp_linkdf.iloc[i]['to_node_id']).dropna(subset=['to_node_id']).iloc[0]['kjam']
+                    else:
+                        ramp_vf = supply.where(supply['from_node_id'] == temp_linkdf.iloc[i]['from_node_id']).dropna(subset=['from_node_id']).iloc[0]['speed']
+                        ramp_kjam = supply.where(supply['from_node_id'] == temp_linkdf.iloc[i]['from_node_id']).dropna(subset=['from_node_id']).iloc[0]['kjam']
+                    
+                    cell = Cell('C'+str(k), temp_linkdf.iloc[i]['link_id'], 'A0', vf=ramp_vf
+                                , kjam=ramp_kjam, arr_rate=500,ramp_flag=1)
                     ramp.append(cell)
                 
                 for index in range(len(ramp)):
@@ -286,7 +294,9 @@ def readNetwork(cell_length=100):
                 link[corridor].extend(ramp)
                 
             else:
-                quicklyCreateCells(int(temp_linkdf.iloc[i]['length'] / cell_length) + 1, temp_linkdf.iloc[i]['link_id'])
+                quicklyCreateCells(int(temp_linkdf.iloc[i]['length'] / cell_length) + 1, temp_linkdf.iloc[i]['link_id'], 
+                                   vf=supply.where(supply['corridor_link_order'] == temp_linkdf.iloc[i]['corridor_link_order']).dropna(subset=['corridor_link_order']).iloc[0]['speed'],
+                                   kjam=supply.where(supply['corridor_link_order'] == temp_linkdf.iloc[i]['corridor_link_order']).dropna(subset=['corridor_link_order']).iloc[0]['kjam'])
                 for key in Cell.idcase:
                     if Cell.idcase[key].linkid == temp_linkdf.iloc[i]['link_id']:
                         link[corridor].append(Cell.idcase[key])
@@ -314,7 +324,7 @@ def simulation_Main():
         start_min = int(re.split(r'_', start_string)[0]) % 100
         end_hour = int(re.split(r'_', end_string)[0]) / 100
         end_min = int(re.split(r'_', end_string)[0]) % 100
-        total_time = int(end_hour) + end_min / 60 - int(start_hour) - start_min / 60 # hour
+        total_time = end_hour + end_min / 60 - start_hour - start_min / 60 # hour
         total_tick = int(total_time * 3600 / time_tick)
         supply_period = (int(re.split(r'_', start_string)[1]) % 100 - int(re.split(r'_', start_string)[0]) % 100) * 60 / time_tick
         
