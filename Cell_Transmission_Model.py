@@ -107,7 +107,8 @@ class Cell(object):
                     merge = elem
             
             try: # In order to cope with situation that provious cell is the first cell (cfrom is empty)
-                prov.inflow = np.min([prov.qmax, prov.vf * prov.cfrom[0].oldk, prov.w * (prov.kjam - prov.oldk)]) * prov.time_hour / prov.length
+                # prov.inflow = np.min([prov.qmax, prov.vf * prov.cfrom[0].oldk, prov.w * (prov.kjam - prov.oldk)]) * prov.time_hour / prov.length
+                prov.inflow = prov.cfrom[0].outflow
                 prov.outflow = np.min([np.median([pk * rek, sbk, rek - sck]), prov.vf * prov.oldk * prov.time_hour / prov.length])
                 
             except:
@@ -115,7 +116,8 @@ class Cell(object):
                 prov.outflow = np.min([np.median([pk * rek, sbk, rek - sck]), prov.vf * prov.oldk * prov.time_hour / prov.length])
             
             if len(merge.cfrom):                
-                merge.inflow = np.min([merge.qmax, merge.vf * merge.cfrom[0].oldk, merge.w * (merge.kjam - merge.oldk)]) * merge.time_hour / merge.length
+                # merge.inflow = np.min([merge.qmax, merge.vf * merge.cfrom[0].oldk, merge.w * (merge.kjam - merge.oldk)]) * merge.time_hour / merge.length
+                merge.inflow = merge.cfrom[0].outflow
                 merge.outflow = np.min([np.median([pck * rek, sck, rek - sbk]), merge.vf * merge.oldk * merge.time_hour / merge.length])
             else:
                 merge.inflow = np.min([merge.qmax, merge.arr_rate, merge.w * (merge.kjam - merge.oldk)]) * merge.time_hour / merge.length
@@ -232,10 +234,10 @@ def getCrossProduct(va, vb):
 def getEuclideanDis(x1, x2, y1, y2):
     return np.sqrt(np.power(x2 - x1, 2) + np.power(y2 - y1, 2))
     
-def quicklyCreateCells(number, linkid):
+def quicklyCreateCells(number, linkid, vf=60, kjam=220):
     cells = []
     for i in range(number):
-        cells.append(Cell('C'+str(i), linkid, 'A0', arr_rate=0, dis_rate=1800))
+        cells.append(Cell('C'+str(i), linkid, 'A0', vf=vf, kjam=kjam, arr_rate=0, dis_rate=1800))
                 
     for index in range(len(cells)):
         if index < len(cells) - 1:
@@ -269,7 +271,15 @@ def readNetwork(cell_length=100):
             ramp = []
             if temp_linkdf.iloc[i]['ramp_flag']:
                 for k in range(int(temp_linkdf.iloc[i]['length'] / cell_length) + 1):
-                    cell = Cell('C'+str(k), temp_linkdf.iloc[i]['link_id'], 'A0', arr_rate=500,ramp_flag=1)
+                    if temp_linkdf.iloc[i]['from_node_id'] == '0' and temp_linkdf.iloc[i]['to_node_id'] != '0':
+                        ramp_vf = supply.where(supply['to_node_id'] == temp_linkdf.iloc[i]['to_node_id']).dropna(subset=['to_node_id']).iloc[0]['speed']
+                        ramp_kjam = supply.where(supply['to_node_id'] == temp_linkdf.iloc[i]['to_node_id']).dropna(subset=['to_node_id']).iloc[0]['kjam']
+                    else:
+                        ramp_vf = supply.where(supply['from_node_id'] == temp_linkdf.iloc[i]['from_node_id']).dropna(subset=['from_node_id']).iloc[0]['speed']
+                        ramp_kjam = supply.where(supply['from_node_id'] == temp_linkdf.iloc[i]['from_node_id']).dropna(subset=['from_node_id']).iloc[0]['kjam']
+                    
+                    cell = Cell('C'+str(k), temp_linkdf.iloc[i]['link_id'], 'A0', vf=ramp_vf
+                                , kjam=ramp_kjam, arr_rate=500,ramp_flag=1)
                     ramp.append(cell)
                 
                 for index in range(len(ramp)):
@@ -286,7 +296,9 @@ def readNetwork(cell_length=100):
                 link[corridor].extend(ramp)
                 
             else:
-                quicklyCreateCells(int(temp_linkdf.iloc[i]['length'] / cell_length) + 1, temp_linkdf.iloc[i]['link_id'])
+                quicklyCreateCells(int(temp_linkdf.iloc[i]['length'] / cell_length) + 1, temp_linkdf.iloc[i]['link_id'], 
+                                   vf=supply.where(supply['corridor_link_order'] == temp_linkdf.iloc[i]['corridor_link_order']).dropna(subset=['corridor_link_order']).iloc[0]['speed'],
+                                   kjam=supply.where(supply['corridor_link_order'] == temp_linkdf.iloc[i]['corridor_link_order']).dropna(subset=['corridor_link_order']).iloc[0]['kjam'])
                 for key in Cell.idcase:
                     if Cell.idcase[key].linkid == temp_linkdf.iloc[i]['link_id']:
                         link[corridor].append(Cell.idcase[key])
@@ -294,6 +306,29 @@ def readNetwork(cell_length=100):
                     Cell.getLastCell(temp_linkdf.iloc[i - 1]['link_id']).addConnection(Cell.getFirstCell(temp_linkdf.iloc[i]['link_id']))
                 
     return (link, demand, supply)
+
+"""
+# 
+def init_simulation(time_tick, time_to_update_demand):
+    network = readNetwork()
+    demand = network[1]
+    supply = network[2]
+    linkdf = pd.read_csv('link.csv', dtype={'link_id': object, 'to_node_id': object, 'from_node_id': object})
+
+# update cell density for a time tick
+def simulation_step(cells, ramps, corr_demand, corr_link, corr_supply):
+    for corridor in network[0]:
+        pass
+        
+    return (density, flow)
+
+class simulation_thread(thread):
+    def __init__(self):
+        pass
+    
+    def 
+
+"""
     
 def simulation_Main():
     network = readNetwork()
@@ -301,7 +336,7 @@ def simulation_Main():
     supply = network[2]
     linkdf = pd.read_csv('link.csv', dtype={'link_id': object, 'to_node_id': object, 'from_node_id': object})
     time_tick = 6
-    time_to_update_demand = 50
+    time_to_update_demand = 50 # update deamnd per 50 time ticks, if time_tick = 6, 50 time ticks means 300 seconds, that is, 5 minutes.
     
     for corridor in network[0]:
         cells = network[0][corridor]
@@ -352,11 +387,14 @@ def simulation_Main():
             ramp_df = corr_link.where(corr_link['ramp_flag'] == 1).dropna(subset=['corridor_id'])
             if len(ramp_df):
                 ramp_demand_df = corr_demand.where(corr_demand['ramp_flag'] == 1).dropna(subset=['corridor_id'])
-                if not t % time_to_update_demand and len(corr_demand):
-                    if int(t / time_to_update_demand) >= len(corr_demand):
-                        Cell.getFirstCell(ramp_df.iloc[0]['link_id']).arr_rate = ramp_demand_df.iloc[-1]['demand']
-                    else:
-                        Cell.getFirstCell(ramp_df.iloc[0]['link_id']).arr_rate = ramp_demand_df.iloc[int(t / time_to_update_demand)]['demand']
+                if len(ramp_demand_df) == 0:
+                    Cell.getFirstCell(ramp_df.iloc[0]['link_id']).arr_rate = 600
+                else:
+                    if not t % time_to_update_demand and len(corr_demand):
+                        if int(t / time_to_update_demand) >= len(corr_demand):
+                            Cell.getFirstCell(ramp_df.iloc[0]['link_id']).arr_rate = ramp_demand_df.iloc[-1]['demand']
+                        else:
+                            Cell.getFirstCell(ramp_df.iloc[0]['link_id']).arr_rate = ramp_demand_df.iloc[int(t / time_to_update_demand)]['demand']
                         
             for elem in ramps:
                 elem.updateDensity()
@@ -365,6 +403,7 @@ def simulation_Main():
                 if not t % supply_period:
                     if elem.ramp_flag == 0:
                         link_order = linkdf.where(linkdf['link_id'] == elem.linkid).dropna(subset=['corridor_id']).iloc[0]['corridor_link_order']
+                        # print(corridor, t, link_order)
                         Cell.getLastCell(elem.linkid).qmax = corr_supply.where(corr_supply['corridor_link_order'] == link_order).dropna(subset=['corridor_id']).iloc[int(t / supply_period)]['volume']
                     # if elem.ramp_flag == 1:
                     #     continue
