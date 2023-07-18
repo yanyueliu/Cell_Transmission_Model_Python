@@ -12,7 +12,7 @@ from datetime import datetime
 
 class Cell(object):
     idcase = {}
-    def __init__(self, cellid, linkid, zoneid, time_interval=6, k=0, qmax=2160, kjam=220, vf=60, w=12, 
+    def __init__(self, cellid, linkid, zoneid, time_interval=6, k=0, qmax=1800, kjam=220, vf=60, w=12, 
                  length=0.1, updated=False, arr_rate=0, dis_rate=2160, ramp_flag=0):
         self.kjam = kjam
         self.cellid = cellid # local address
@@ -68,6 +68,14 @@ class Cell(object):
                 newDict[key] = Cell.idcase[key]
                 
         return newDict[min(newDict.keys())]
+    
+    def getAllCellsinSameLink(linkid):
+        result_list = []
+        for key in Cell.idcase:
+            if Cell.idcase[key].linkid == linkid:
+                result_list.append(Cell.idcase[key])
+
+        return result_list
     
     def getLastCell(linkid):
         newDict = {}
@@ -286,12 +294,19 @@ def readNetwork(cell_length=100):
                     if index < len(ramp) - 1:
                         ramp[index].addConnection(ramp[index + 1])
                         
-                corrs_link = temp_linkdf.where(temp_linkdf['to_node_id'] == temp_linkdf.iloc[i]['to_node_id']).dropna(subset=['to_node_id'])
-                if len(corrs_link) < 2:
-                    corrs_link = temp_linkdf.where(temp_linkdf['from_node_id'] == temp_linkdf.iloc[i]['from_node_id']).dropna(subset=['from_node_id'])
+                if temp_linkdf.iloc[i]['to_node_id'] == '0' and temp_linkdf.iloc[i]['from_node_id'] != '0':
+                    corrs_link = temp_linkdf.where(temp_linkdf['to_node_id'] == temp_linkdf.iloc[i]['from_node_id']).dropna(subset=['to_node_id'])
                     Cell.getLastCell(corrs_link.where(corrs_link['link_id'] != temp_linkdf.iloc[i]['link_id']).dropna(subset=['link_id']).iloc[0]['link_id']).addConnection(Cell.getFirstCell(temp_linkdf.iloc[i]['link_id']))
                 else:
+                    corrs_link = temp_linkdf.where(temp_linkdf['from_node_id'] == temp_linkdf.iloc[i]['to_node_id']).dropna(subset=['from_node_id'])
                     Cell.getLastCell(temp_linkdf.iloc[i]['link_id']).addConnection(Cell.getFirstCell(corrs_link.where(corrs_link['link_id'] != temp_linkdf.iloc[i]['link_id']).dropna(subset=['link_id']).iloc[0]['link_id']))
+
+                # corrs_link = temp_linkdf.where(temp_linkdf['from_node_id'] == temp_linkdf.iloc[i]['to_node_id']).dropna(subset=['to_node_id'])
+                # if len(corrs_link) < 2:
+                #     corrs_link = temp_linkdf.where(temp_linkdf['from_node_id'] == temp_linkdf.iloc[i]['from_node_id']).dropna(subset=['from_node_id'])
+                #     Cell.getLastCell(corrs_link.where(corrs_link['link_id'] != temp_linkdf.iloc[i]['link_id']).dropna(subset=['link_id']).iloc[0]['link_id']).addConnection(Cell.getFirstCell(temp_linkdf.iloc[i]['link_id']))
+                # else:
+                #     Cell.getLastCell(temp_linkdf.iloc[i]['link_id']).addConnection(Cell.getFirstCell(corrs_link.where(corrs_link['link_id'] != temp_linkdf.iloc[i]['link_id']).dropna(subset=['link_id']).iloc[0]['link_id']))
                     
                 link[corridor].extend(ramp)
                 
@@ -403,8 +418,9 @@ def simulation_Main():
                 if not t % supply_period:
                     if elem.ramp_flag == 0:
                         link_order = linkdf.where(linkdf['link_id'] == elem.linkid).dropna(subset=['corridor_id']).iloc[0]['corridor_link_order']
-                        # print(corridor, t, link_order)
-                        Cell.getLastCell(elem.linkid).qmax = corr_supply.where(corr_supply['corridor_link_order'] == link_order).dropna(subset=['corridor_id']).iloc[int(t / supply_period)]['volume']
+                        new_qmax = corr_supply.where(corr_supply['corridor_link_order'] == link_order).dropna(subset=['corridor_id']).iloc[int(t / supply_period)]['volume']
+                        # the volume changes only affects the last cell of the link.
+                        Cell.getLastCell(elem.linkid).qmax = new_qmax
                     # if elem.ramp_flag == 1:
                     #     continue
                     # link_order = linkdf.where(linkdf['link_id'] == elem.linkid).dropna(subset=['corridor_id']).iloc[0]['corridor_link_order']
