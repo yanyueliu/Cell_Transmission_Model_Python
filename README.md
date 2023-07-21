@@ -41,3 +41,6 @@ A bug about merge ramp and diverge ramp is fixed.
 A new example is uploaded (The example 4). The example shows how to set dynamic freeflow speed and jam density in the supply.csv.<br></br>
 The users can use the speed column in the supply.csv to set freeflow speed of a link.<br></br>
 A new column named kjam is added into the supply.csv, which can be used to set jam density of a link.
+
+### July 21 2023
+The program is partially rebuilt. Now the simulation is a subclass of threading.Thread. Several new features are added as below. <br></br> 1. Users can externally use the CTM simulation more conveniently. That is, import the CTM file as a part of other codes. For detail, please refer Example_of_Use_CTM_Externally.py. <br></br> 2. Some bugs are fixed. In the former version, if cell_length < vf / time_tick, negative traffic flow and density will occur. Now the minimum traffic flow and density is locked at 0. <br></br> 3. Users now can run the simulation step by step, and add any conditions to change parameters of the simulation. 
