@@ -2,8 +2,8 @@
 ## Overview
 This program is based on former CTM program in python: (https://github.com/yanyueliu/Cell_Transmission_Model_Python/tree/Old-version). This version can read GMNS format file and generate CTM network automatically. A example of Arizona network is contained in the program.
 
-### Quick Start (Can be also found in Exmaple_of_Use_CTM_Externally.py)
-```shell
+### Quick Start 
+```python
 import Cell_Transmission_Model as CTM
 from datetime import datetime
 
@@ -25,7 +25,7 @@ print("Elapsed Time:", end - start)
 for key in CTM.Corridor.idcase:
     CTM.Corridor.idcase[key].printResults()
 ```
-
+Can be also found in Exmaple_of_Use_CTM_Externally.py<br></br>
 ## I/O
 ### Input
 #### link.csv
