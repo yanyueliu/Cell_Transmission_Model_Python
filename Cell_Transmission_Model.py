@@ -404,6 +404,8 @@ class simulation_thread(threading.Thread):
             total_time = int(end_hour) + end_min / 60 - int(start_hour) - start_min / 60 # hour
             total_tick = int(total_time * 3600 / self.tick)
             supply_period = (int(re.split(r'_', start_string)[1]) % 100 - int(re.split(r'_', start_string)[0]) % 100) * 60 / self.tick
+            if supply_period == 0:
+                supply_period = 60 * 60 / self.tick
             
             dfindex = []
             main_roads = []
